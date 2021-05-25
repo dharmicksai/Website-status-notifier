@@ -1,7 +1,7 @@
 from flask import Flask, request
 from markupsafe import escape
 from validate_email import validate_email
-
+from awsses import Email
 
 app = Flask(__name__)
 
@@ -9,6 +9,7 @@ app = Flask(__name__)
 def home():
     print(is_valid)
     return "hello world"
+
 
 @app.route("/add/", methods=['GET', 'POST'])
 def addWebsite():
@@ -30,6 +31,22 @@ def addWebsite():
     is_valid = validate_email(userEmail, verify=True)
     
     if(is_valid):
+        email = Email('New subscription')
+        email.body_text('Testing AWS SES')
+        html = """<html>
+        <head></head>
+        <body>
+        <h1>New subcription to our service</h1>
+        <p>Thank you for subscribing to the website
+            <a href='{websiteRequested}'>{websiteRequested}</a>.
+        You will be receiving the status of website every five minutes.
+        </body>
+        </html>
+        
+        """.format(websiteRequested=websiteRequested)
+        email.body_html(html)
+        email.send([userEmail])
+
         # TO-DO -> Add to the database.
         return {
             'status': 'success'
