@@ -20,3 +20,9 @@ MYSQL_DATABASE_HOST=
 ## DB init
 - ``CREATE TABLE subscriptions(id INT NOT NULL AUTO_INCREMENT, domain varchar(30), email varchar(20), PRIMARY KEY (id));``
 - ``CREATE TABLE lastStatus(domain varchar(30), statusCode varchar(3), PRIMARY KEY (domain));``
+
+
+## Technologies used:
+- AWS SES for Emails
+- Flask as backend
+- MySQL for database.
