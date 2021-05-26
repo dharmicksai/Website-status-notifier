@@ -74,4 +74,3 @@ class Email(object):
         else:
             print("Email sent! Message ID:"),
             print(response['MessageId'])
-

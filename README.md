@@ -4,4 +4,19 @@
 - Make sure to change the default us-east-2 aws region in the awsses.py
 - All the emails subscribing to the websites should be verified if the SES is still in the sandbox.
 - The sender email should also be verified in the AWS console.
-- Do ``export FLASK_APP=backend`` and run ``flask run``
+- Install all the dependencies mentioned in requirements.txt
+- Insert all the required keys in .env file
+- Make sure ``~/.aws/credentials`` and ``~/.aws/config`` are there and contains all the required keys.
+- Do ``export FLASK_APP=backend`` and run ``flask run`` to start the backend server.
+
+
+## .env Template
+```
+MYSQL_DATABASE_USER=
+MYSQL_DATABASE_PASSWORD=
+MYSQL_DATABASE_HOST=
+```
+
+## DB init
+- ``CREATE TABLE subscriptions(id INT NOT NULL AUTO_INCREMENT, domain varchar(30), email varchar(20), PRIMARY KEY (id));``
+- ``CREATE TABLE lastStatus(domain varchar(30), statusCode varchar(3), PRIMARY KEY (domain));``

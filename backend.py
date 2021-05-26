@@ -1,14 +1,28 @@
 from flask import Flask, request
 from markupsafe import escape
-from validate_email import validate_email
 from awsses import Email
+import os
+from validators import emailValidation, isValidDomain
+from flaskext.mysql import MySQL
+from dotenv import load_dotenv
 
+
+load_dotenv()
 app = Flask(__name__)
+mysql = MySQL()
+
+
+app.config['MYSQL_DATABASE_USER'] = os.getenv('MYSQL_DATABASE_USER')
+app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv('MYSQL_DATABASE_PASSWORD')
+app.config['MYSQL_DATABASE_DB'] = 'websiteStatus'
+app.config['MYSQL_DATABASE_HOST'] = os.getenv("MYSQL_DATABASE_HOST")
+
+mysql.init_app(app)
+
 
 @app.route('/')
 def home():
-    print(is_valid)
-    return "hello world"
+    return "Home"
 
 
 @app.route("/add/", methods=['GET', 'POST'])
@@ -18,44 +32,76 @@ def addWebsite():
         return {
             "form":'form'
         }
-    userEmail = request.args.get('email')
-    websiteRequested = request.args.get('website')
+
+    
+    userEmail = request.args.get('email').lower()
+    websiteRequested = request.args.get('website').lower()
+
+    # Entered email and webiste are None
     if not userEmail or not websiteRequested:
         return {
             'status': 'failure',
             'reason': 'Post request required fields not found'
         }
+
+    # Entered email is not None but it is invalid
+    if not emailValidation(userEmail):
+        return {
+            'status': 'failure',
+            'reason': 'Entered email is invalid'
+        }
+
+    if not isValidDomain(websiteRequested):
+        return {
+            'status': 'failure',
+            'reason': 'Entered domain is invalid'
+        }
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
     print(userEmail, websiteRequested)
-
-    # Validates the email. No need to send an email and verify
-    is_valid = validate_email(userEmail, verify=True)
     
-    if(is_valid):
-        email = Email('New subscription')
-        email.body_text('Testing AWS SES')
-        html = """<html>
-        <head></head>
-        <body>
-        <h1>New subcription to our service</h1>
-        <p>Thank you for subscribing to the website
-            <a href='{websiteRequested}'>{websiteRequested}</a>.
-        You will be receiving the status of website every five minutes.
-        </body>
-        </html>
-        
-        """.format(websiteRequested=websiteRequested)
-        email.body_html(html)
-        email.send([userEmail])
+    # Primary key is domain itself in lastStatus
+    try:
+        cursor.execute("INSERT INTO lastStatus(domain) VALUES (%s)", (websiteRequested,))
+    except:
+        print("The domain already exists in the lastStatus table")
 
-        # TO-DO -> Add to the database.
+
+    # Primary key in subscriptions is id, need to avoid duplicate entries
+    cursor.execute("SELECT * FROM subscriptions where email = %s and domain = %s", (userEmail, websiteRequested))
+    if cursor.fetchone():
+        conn.commit()
+        conn.close()
         return {
             'status': 'success'
         }
-    else:
-        return {
-            'status': 'failure',
-            'reason': 'Invalid email'
-        }
+    
+    cursor.execute("INSERT INTO subscriptions (email, domain) VALUES (%s, %s)", (userEmail, websiteRequested))
+    conn.commit()
+    conn.close()
+
+    email = Email('New subscription')
+    email.body_text('Testing AWS SES')
+    html = """<html>
+    <head></head>
+    <body>
+    <h1>New subcription to our service</h1>
+    <p>Thank you for subscribing to the website
+        <a href='{websiteRequested}'>{websiteRequested}</a>.
+    You will be receiving the status of website every five minutes.
+    </body>
+    </html>
+    
+    """.format(websiteRequested=websiteRequested)
+    email.body_html(html)
+    # email.send([userEmail])
+
+    return {
+        'status': 'success'
+    }
+
 
 if __name__ == '__main__':
     app.run(debug=True)
