@@ -3,15 +3,15 @@ import mysql.connector
 import requests
 from awsses import Email
 import time
+from dotenv import load_dotenv
+load_dotenv()
 
-print(os.getenv('MYSQL_DATABASE_USER'))
-print(os.getenv('MYSQL_DATABASE_PASSWORD'))
-print(os.getenv("MYSQL_DATABASE_HOST"))
+
 
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="root@I"
+  host=os.getenv("MYSQL_DATABASE_HOST"),
+  user=os.getenv('MYSQL_DATABASE_USER'),
+  password=os.getenv('MYSQL_DATABASE_PASSWORD')
 )
 mycursor = mydb.cursor()
 
@@ -46,7 +46,7 @@ while 1:
         domain = "https://"+domains[i]
         
         r = requests.get(domain)
-        print(r.status_code)
+        # print(r.status_code)
         if str(r.status_code) != status[domains[i]]:
             if r.status_code != 200 :
                 subject = "Error: "+str(r.status_code)+" for "+domain
