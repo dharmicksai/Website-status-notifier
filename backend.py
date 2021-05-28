@@ -1,8 +1,8 @@
-from flask import Flask, request
+from flask import Flask, request ,render_template
 from markupsafe import escape
 from awsses import Email
 import os
-from validators import emailValidation, isValidDomain
+from validate import emailValidation, isValidDomain
 from flaskext.mysql import MySQL
 from dotenv import load_dotenv
 
@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 mysql = MySQL()
-
+print(os.getenv('MYSQL_DATABASE_USER'))
+print(os.getenv('MYSQL_DATABASE_PASSWORD'))
+print(os.getenv("MYSQL_DATABASE_HOST"))
 
 app.config['MYSQL_DATABASE_USER'] = os.getenv('MYSQL_DATABASE_USER')
 app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv('MYSQL_DATABASE_PASSWORD')
@@ -29,14 +31,13 @@ def home():
 def addWebsite():
     if request.method == 'GET':
         # Render the subscribe page.
-        return {
-            "form":'form'
-        }
+        return render_template("form.html")
 
+    #print(request)
     
-    userEmail = request.args.get('email').lower()
-    websiteRequested = request.args.get('website').lower()
-
+    userEmail = request.form['email'].lower()
+    websiteRequested = request.form['website'].lower()
+    print(userEmail + "    " + websiteRequested)
     # Entered email and webiste are None
     if not userEmail or not websiteRequested:
         return {
@@ -96,7 +97,7 @@ def addWebsite():
     
     """.format(websiteRequested=websiteRequested)
     email.body_html(html)
-    # email.send([userEmail])
+    email.send([userEmail])
 
     return {
         'status': 'success'

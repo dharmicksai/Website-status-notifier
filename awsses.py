@@ -18,9 +18,9 @@ class Email(object):
         # recipients is an array
         self.recipients = recipients
         
-        SENDER = "Srujan Bharadwaj <srujanbharadwaj44@gmail.com>"
+        SENDER = "wec.systems.IST@gmail.com"
 
-        AWS_REGION = "us-east-2"
+        AWS_REGION = "ap-south-1"
 
         # The email body for recipients with non-HTML email clients.
         BODY_TEXT = self.text or ("Amazon SES Test (Python)\r\n"
@@ -70,6 +70,7 @@ class Email(object):
                 Source=SENDER,
             )
         except ClientError as e:
+            print("Error:")
             print(e.response['Error']['Message'])
         else:
             print("Email sent! Message ID:"),
