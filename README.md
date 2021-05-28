@@ -15,10 +15,12 @@
 MYSQL_DATABASE_USER=
 MYSQL_DATABASE_PASSWORD=
 MYSQL_DATABASE_HOST=
+SENDER_EMAIL=
+AWS_REGION=
 ```
 
 ## DB init
-- ``CREATE TABLE subscriptions(id INT NOT NULL AUTO_INCREMENT, domain varchar(30), email varchar(20), PRIMARY KEY (id));``
+- ``CREATE TABLE subscriptions(id INT NOT NULL AUTO_INCREMENT, domain varchar(50), email varchar(50), PRIMARY KEY (id));``
 - ``CREATE TABLE lastStatus(domain varchar(30), statusCode varchar(3), PRIMARY KEY (domain));``
 
 

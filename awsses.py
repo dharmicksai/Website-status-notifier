@@ -1,5 +1,8 @@
 import boto3
 from botocore.exceptions import ClientError
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class Email(object):
     def __init__(self, subject):
@@ -18,9 +21,9 @@ class Email(object):
         # recipients is an array
         self.recipients = recipients
         
-        SENDER = "wec.systems.IST@gmail.com"
+        SENDER = os.getenv("SENDER_EMAIL")
 
-        AWS_REGION = "ap-south-1"
+        AWS_REGION = os.getenv("AWS_REGION")
 
         # The email body for recipients with non-HTML email clients.
         BODY_TEXT = self.text or ("Amazon SES Test (Python)\r\n"
